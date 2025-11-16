@@ -8,8 +8,8 @@
 
 ## 📋 PROGRESSION GLOBALE
 
-- [ ] Phase 1 : Conception API
-- [ ] Phase 2 : Génération de code
+- [x] Phase 1 : Conception API
+- [x] Phase 2 : Génération de code
 - [ ] Phase 3 : Implémentation serveur
 - [ ] Phase 4 : Intégration client
 - [ ] Phase 5 : Tests et validation
@@ -22,43 +22,43 @@
 
 ### Tâches
 
-- [ ] **1.1** Créer le fichier `api/openapi/tickets-api.yaml`
-- [ ] **1.2** Définir les schémas JSON pour les DTOs
-  - [ ] Schéma `TicketDTO`
-  - [ ] Schéma `UserDTO`
-  - [ ] Schéma `ContentItemDTO`
-  - [ ] Schéma `CommentDTO`
-  - [ ] Schéma `StatusUpdateDTO`
-  - [ ] Schéma `AssignmentDTO`
-- [ ] **1.3** Définir les endpoints `/users`
-  - [ ] `GET /users` - Liste tous les utilisateurs
-  - [ ] `GET /users/{id}` - Détails d'un utilisateur
-- [ ] **1.4** Définir les endpoints `/tickets`
-  - [ ] `GET /tickets` - Liste des tickets (avec filtres)
-  - [ ] `GET /tickets/{id}` - Détails d'un ticket
-  - [ ] `POST /tickets` - Créer un ticket
-  - [ ] `PUT /tickets/{id}` - Modifier un ticket
-  - [ ] `DELETE /tickets/{id}` - Supprimer un ticket
-- [ ] **1.5** Définir les endpoints `/tickets/{id}/comments`
-  - [ ] `GET /tickets/{id}/comments` - Liste des commentaires
-  - [ ] `POST /tickets/{id}/comments` - Ajouter un commentaire
-- [ ] **1.6** Définir les endpoints de gestion d'état
-  - [ ] `PATCH /tickets/{id}/status` - Changer le statut
-  - [ ] `PATCH /tickets/{id}/assignment` - Assigner à un utilisateur
-  - [ ] `GET /tickets/{id}/export/pdf` - Exporter en PDF
-- [ ] **1.7** Définir les endpoints `/auth`
-  - [ ] `POST /auth/login` - Authentification
-  - [ ] `GET /auth/session` - Vérifier session
-  - [ ] `POST /auth/logout` - Déconnexion
-- [ ] **1.8** Documenter les codes d'erreur HTTP
-  - [ ] 200 OK
-  - [ ] 201 Created
-  - [ ] 400 Bad Request (validation échouée)
-  - [ ] 401 Unauthorized (non authentifié)
-  - [ ] 403 Forbidden (permissions insuffisantes)
-  - [ ] 404 Not Found
-  - [ ] 500 Internal Server Error
-- [ ] **1.9** Valider le fichier OpenAPI avec un validateur en ligne
+- [x] **1.1** Créer le fichier `api/openapi/tickets-api.yaml`
+- [x] **1.2** Définir les schémas JSON pour les DTOs
+  - [x] Schéma `TicketDTO`
+  - [x] Schéma `UserDTO`
+  - [x] Schéma `ContentItemDTO`
+  - [x] Schéma `CommentDTO`
+  - [x] Schéma `StatusUpdateDTO`
+  - [x] Schéma `AssignmentDTO`
+- [x] **1.3** Définir les endpoints `/users`
+  - [x] `GET /users` - Liste tous les utilisateurs
+  - [x] `GET /users/{id}` - Détails d'un utilisateur
+- [x] **1.4** Définir les endpoints `/tickets`
+  - [x] `GET /tickets` - Liste des tickets (avec filtres)
+  - [x] `GET /tickets/{id}` - Détails d'un ticket
+  - [x] `POST /tickets` - Créer un ticket
+  - [x] `PUT /tickets/{id}` - Modifier un ticket
+  - [x] `DELETE /tickets/{id}` - Supprimer un ticket
+- [x] **1.5** Définir les endpoints `/tickets/{id}/comments`
+  - [x] `GET /tickets/{id}/comments` - Liste des commentaires
+  - [x] `POST /tickets/{id}/comments` - Ajouter un commentaire
+- [x] **1.6** Définir les endpoints de gestion d'état
+  - [x] `PATCH /tickets/{id}/status` - Changer le statut
+  - [x] `PATCH /tickets/{id}/assignment` - Assigner à un utilisateur
+  - [x] `GET /tickets/{id}/export/pdf` - Exporter en PDF
+- [x] **1.7** Définir les endpoints `/auth`
+  - [x] `POST /auth/login` - Authentification
+  - [x] `GET /auth/session` - Vérifier session
+  - [x] `POST /auth/logout` - Déconnexion
+- [x] **1.8** Documenter les codes d'erreur HTTP
+  - [x] 200 OK
+  - [x] 201 Created
+  - [x] 400 Bad Request (validation échouée)
+  - [x] 401 Unauthorized (non authentifié)
+  - [x] 403 Forbidden (permissions insuffisantes)
+  - [x] 404 Not Found
+  - [x] 500 Internal Server Error
+- [x] **1.9** Valider le fichier OpenAPI avec un validateur en ligne
 
 **Livrables Phase 1** :
 - Fichier `api/openapi/tickets-api.yaml` complet et valide
@@ -67,35 +67,56 @@
 
 ## ⚙️ PHASE 2 : GÉNÉRATION DE CODE
 
-**Objectif** : Générer les squelettes client et serveur avec swagger-codegen
+**Objectif** : Créer le code serveur et client pour l'API REST
 
 ### Tâches
 
-- [ ] **2.1** Installer swagger-codegen (si nécessaire)
-- [ ] **2.2** Créer les répertoires de destination
-  - [ ] `api/server/`
-  - [ ] `api/client/`
-- [ ] **2.3** Générer le serveur JAX-RS
-  ```bash
-  swagger-codegen generate -i api/openapi/tickets-api.yaml -l jaxrs-spec -o api/server
-  ```
-- [ ] **2.4** Générer le client Java
-  ```bash
-  swagger-codegen generate -i api/openapi/tickets-api.yaml -l java -o api/client
-  ```
-- [ ] **2.5** Examiner le code généré
-  - [ ] Vérifier les classes de ressources serveur
-  - [ ] Vérifier les classes du client API
-  - [ ] Identifier les fichiers à implémenter (stubs)
-- [ ] **2.6** Compiler le code généré (test initial)
-  - [ ] Compiler le serveur
-  - [ ] Compiler le client
-- [ ] **2.7** Corriger les erreurs de compilation si nécessaire
+- [x] **2.1** Vérifier les outils disponibles (Java 25 disponible)
+- [x] **2.2** Créer les répertoires de destination
+  - [x] `api/server/models/`
+  - [x] `api/server/resources/`
+  - [x] `api/server/services/`
+  - [x] `api/client/`
+- [x] **2.3** Créer les modèles serveur (DTOs)
+  - [x] UserDTO.java
+  - [x] TicketDTO.java
+  - [x] ContentItemDTO.java
+  - [x] CreateTicketRequest.java
+  - [x] UpdateTicketRequest.java
+  - [x] CommentRequest.java
+  - [x] StatusUpdateDTO.java
+  - [x] AssignmentDTO.java
+  - [x] LoginRequest.java
+  - [x] AuthResponse.java
+  - [x] ErrorResponse.java
+- [x] **2.4** Créer les ressources HTTP (handlers)
+  - [x] BaseResource.java (classe de base)
+  - [x] AuthResource.java (authentification)
+  - [x] UserResource.java (utilisateurs)
+  - [x] TicketResource.java (tickets complets)
+- [x] **2.5** Créer ApplicationState côté serveur
+  - [x] Singleton thread-safe avec ConcurrentHashMap
+  - [x] Gestion des sessions
+  - [x] Conversion Entity ↔ DTO
+  - [x] Méthodes métier (CRUD, commentaires, statuts, etc.)
+- [x] **2.6** Créer le serveur HTTP principal
+  - [x] TicketAPIServer.java
+  - [x] Configuration HttpServer (port 8080)
+  - [x] Enregistrement des handlers
+- [x] **2.7** Télécharger Gson et compiler le serveur
+  - [x] Télécharger gson-2.10.1.jar
+  - [x] Compiler le code serveur
+  - [x] Tester le démarrage du serveur
+- [x] **2.8** Ajouter page d'accueil API
+  - [x] Créer ApiHomeResource.java
+  - [x] Enregistrer route GET /api/v1
+  - [x] Mettre à jour la documentation README
 
 **Livrables Phase 2** :
-- Code serveur généré dans `api/server/`
-- Code client généré dans `api/client/`
-- Code compilable sans erreurs
+- ✅ Code serveur complet dans `api/server/`
+- ✅ Serveur HTTP fonctionnel avec tous les endpoints
+- ✅ Documentation README pour compilation/exécution
+- ✅ Page d'accueil API (GET /api/v1)
 
 ---
 
@@ -388,6 +409,11 @@ core/entities
 
 ## 🗺️ Mapping complet des endpoints REST
 
+### Ressource : / (racine API)
+| Méthode | Endpoint | Description | Entrée | Sortie |
+|---------|----------|-------------|--------|--------|
+| GET | `/api/v1` | Page d'accueil de l'API | - | Infos API (nom, version, status) |
+
 ### Ressource : /users
 | Méthode | Endpoint | Description | Entrée | Sortie |
 |---------|----------|-------------|--------|--------|
@@ -478,7 +504,9 @@ _(Mettre à jour au fur et à mesure de l'avancement)_
 **Date** | **Phase** | **Tâche** | **Statut** | **Notes**
 ---------|-----------|-----------|------------|----------
 2025-11-16 | Phase 0 | Analyse du domaine | ✅ Complété | Architecture existante bien structurée
- | | | |
+2025-11-16 | Phase 1 | Conception API OpenAPI | ✅ Complété | Fichier tickets-api.yaml validé
+2025-11-16 | Phase 2 | Génération code serveur | ✅ Complété | Serveur HTTP avec Gson fonctionnel
+2025-11-16 | Phase 2 | Ajout page d'accueil API | ✅ Complété | GET /api/v1 retourne infos de l'API
  | | | |
 
 ### Difficultés rencontrées
