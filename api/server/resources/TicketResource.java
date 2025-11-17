@@ -3,6 +3,7 @@ package api.server.resources;
 import com.sun.net.httpserver.HttpExchange;
 import api.server.models.*;
 import api.server.services.ApplicationState;
+import core.entities.User;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,34 +12,38 @@ import java.util.List;
  * TicketResource - Handler pour tous les endpoints tickets
  *
  * CRUD Tickets:
- * GET    /api/v1/tickets
- * POST   /api/v1/tickets
- * GET    /api/v1/tickets/{id}
- * PUT    /api/v1/tickets/{id}
- * DELETE /api/v1/tickets/{id}
+ * GET    /api/v1/tickets             [Auth requis]
+ * POST   /api/v1/tickets             [Auth requis]
+ * GET    /api/v1/tickets/{id}        [Auth requis]
+ * PUT    /api/v1/tickets/{id}        [Auth requis + permissions]
+ * DELETE /api/v1/tickets/{id}        [Admin seulement]
  *
  * Comments:
- * GET  /api/v1/tickets/{id}/comments
- * POST /api/v1/tickets/{id}/comments
+ * GET  /api/v1/tickets/{id}/comments [Auth requis]
+ * POST /api/v1/tickets/{id}/comments [Auth requis]
  *
  * Status:
- * GET   /api/v1/tickets/{id}/status
- * PATCH /api/v1/tickets/{id}/status
+ * GET   /api/v1/tickets/{id}/status  [Auth requis]
+ * PATCH /api/v1/tickets/{id}/status  [Admin/Dev seulement]
  *
  * Assignment:
- * PATCH /api/v1/tickets/{id}/assignment
+ * PATCH /api/v1/tickets/{id}/assignment [Admin/Dev seulement]
  *
  * Export:
- * GET /api/v1/tickets/{id}/export/pdf
+ * GET /api/v1/tickets/{id}/export/pdf [Auth requis]
  */
 public class TicketResource extends BaseResource {
-
-    private final ApplicationState appState = ApplicationState.getInstance();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
+
+        // Support CORS preflight
+        if ("OPTIONS".equals(method)) {
+            handleOptionsRequest(exchange);
+            return;
+        }
 
         try {
             // Router vers le bon handler
@@ -87,17 +92,35 @@ public class TicketResource extends BaseResource {
 
     /**
      * GET /tickets
+     * Authentification requise
+     * Admin/Dev voient tous les tickets, les autres seulement les leurs
      */
     private void handleGetAllTickets(HttpExchange exchange) throws IOException {
+        User user = requireAuth(exchange);
+        if (user == null) return; // Erreur 401 déjà envoyée
+
         List<TicketDTO> tickets = appState.getAllTicketsDTO();
+
+        // Filtrer selon les permissions
+        if (!hasFullAccess(user)) {
+            // Utilisateur normal: seulement ses propres tickets
+            tickets = tickets.stream()
+                .filter(t -> t.getCreatedByName().equals(user.getName()))
+                .toList();
+        }
+
         sendJsonResponse(exchange, 200, tickets);
-        System.out.println("[TICKETS] Liste de " + tickets.size() + " tickets récupérée");
+        System.out.println("[TICKETS] Liste de " + tickets.size() + " tickets récupérée pour " + user.getName());
     }
 
     /**
      * GET /tickets/{id}
+     * Authentification requise
      */
     private void handleGetTicketById(HttpExchange exchange, String path) throws IOException {
+        User user = requireAuth(exchange);
+        if (user == null) return;
+
         Integer ticketId = extractIdFromPath(path);
 
         if (ticketId == null) {
@@ -112,14 +135,25 @@ public class TicketResource extends BaseResource {
             return;
         }
 
+        // Vérifier que l'utilisateur a accès à ce ticket
+        if (!hasFullAccess(user) && !ticket.getCreatedByName().equals(user.getName())) {
+            sendErrorResponse(exchange, 403, "FORBIDDEN",
+                "Vous n'avez pas accès à ce ticket");
+            return;
+        }
+
         sendJsonResponse(exchange, 200, ticket);
-        System.out.println("[TICKETS] Ticket #" + ticketId + " récupéré");
+        System.out.println("[TICKETS] Ticket #" + ticketId + " récupéré par " + user.getName());
     }
 
     /**
      * POST /tickets
+     * Authentification requise (tous les utilisateurs peuvent créer)
      */
     private void handleCreateTicket(HttpExchange exchange) throws IOException {
+        User user = requireAuth(exchange);
+        if (user == null) return;
+
         String requestBody = readRequestBody(exchange);
         CreateTicketRequest request = gson.fromJson(requestBody, CreateTicketRequest.class);
 
@@ -128,21 +162,39 @@ public class TicketResource extends BaseResource {
             return;
         }
 
-        // Créer le ticket via ApplicationState
-        TicketDTO createdTicket = appState.createTicket(request);
+        // Créer le ticket avec l'utilisateur authentifié
+        TicketDTO createdTicket = appState.createTicket(request, user);
 
         sendJsonResponse(exchange, 201, createdTicket);
-        System.out.println("[TICKETS] Ticket #" + createdTicket.getTicketID() + " créé: " + createdTicket.getTitle());
+        System.out.println("[TICKETS] Ticket #" + createdTicket.getTicketID() + " créé par " + user.getName() + ": " + createdTicket.getTitle());
     }
 
     /**
      * PUT /tickets/{id}
+     * Authentification requise + permissions (créateur ou Admin/Dev)
      */
     private void handleUpdateTicket(HttpExchange exchange, String path) throws IOException {
+        User user = requireAuth(exchange);
+        if (user == null) return;
+
         Integer ticketId = extractIdFromPath(path);
 
         if (ticketId == null) {
             sendErrorResponse(exchange, 400, "VALIDATION_ERROR", "ID ticket invalide");
+            return;
+        }
+
+        // Vérifier que le ticket existe et récupérer le créateur
+        core.entities.Ticket ticket = appState.findTicketById(ticketId);
+        if (ticket == null) {
+            sendErrorResponse(exchange, 404, "NOT_FOUND", "Ticket #" + ticketId + " introuvable");
+            return;
+        }
+
+        // Vérifier les permissions
+        if (!canEditTicket(user, ticket.getCreatedByUserID())) {
+            sendErrorResponse(exchange, 403, "FORBIDDEN",
+                "Vous n'êtes pas autorisé à modifier ce ticket");
             return;
         }
 
@@ -151,19 +203,21 @@ public class TicketResource extends BaseResource {
 
         TicketDTO updatedTicket = appState.updateTicket(ticketId, request);
 
-        if (updatedTicket == null) {
-            sendErrorResponse(exchange, 404, "NOT_FOUND", "Ticket #" + ticketId + " introuvable");
-            return;
-        }
-
         sendJsonResponse(exchange, 200, updatedTicket);
-        System.out.println("[TICKETS] Ticket #" + ticketId + " modifié");
+        System.out.println("[TICKETS] Ticket #" + ticketId + " modifié par " + user.getName());
     }
 
     /**
      * DELETE /tickets/{id}
+     * Admin seulement
      */
     private void handleDeleteTicket(HttpExchange exchange, String path) throws IOException {
+        User user = requireAuth(exchange);
+        if (user == null) return;
+
+        // Vérifier que l'utilisateur est admin
+        if (!requireAdmin(exchange, user)) return;
+
         Integer ticketId = extractIdFromPath(path);
 
         if (ticketId == null) {
@@ -179,13 +233,17 @@ public class TicketResource extends BaseResource {
         }
 
         sendNoContent(exchange);
-        System.out.println("[TICKETS] Ticket #" + ticketId + " supprimé");
+        System.out.println("[TICKETS] Ticket #" + ticketId + " supprimé par " + user.getName());
     }
 
     /**
      * Gestion des commentaires
+     * Authentification requise
      */
     private void handleCommentsEndpoints(HttpExchange exchange, String method, String path) throws IOException {
+        User user = requireAuth(exchange);
+        if (user == null) return;
+
         Integer ticketId = extractIdFromPath(path.replace("/comments", ""));
 
         if (ticketId == null) {
@@ -214,7 +272,7 @@ public class TicketResource extends BaseResource {
             }
 
             sendJsonResponse(exchange, 201, comment);
-            System.out.println("[COMMENTS] Commentaire ajouté au ticket #" + ticketId);
+            System.out.println("[COMMENTS] Commentaire ajouté au ticket #" + ticketId + " par " + user.getName());
         } else {
             sendErrorResponse(exchange, 405, "METHOD_NOT_ALLOWED", "Méthode non autorisée");
         }
@@ -222,8 +280,13 @@ public class TicketResource extends BaseResource {
 
     /**
      * Gestion des statuts
+     * GET: Authentification requise
+     * PATCH: Admin/Dev seulement
      */
     private void handleStatusEndpoints(HttpExchange exchange, String method, String path) throws IOException {
+        User user = requireAuth(exchange);
+        if (user == null) return;
+
         Integer ticketId = extractIdFromPath(path.replace("/status", ""));
 
         if (ticketId == null) {
@@ -241,6 +304,13 @@ public class TicketResource extends BaseResource {
 
             sendJsonResponse(exchange, 200, transitions);
         } else if ("PATCH".equals(method)) {
+            // Seuls Admin et Développeur peuvent changer les statuts
+            if (!hasFullAccess(user)) {
+                sendErrorResponse(exchange, 403, "FORBIDDEN",
+                    "Seuls les administrateurs et développeurs peuvent changer les statuts");
+                return;
+            }
+
             String requestBody = readRequestBody(exchange);
             StatusUpdateDTO request = gson.fromJson(requestBody, StatusUpdateDTO.class);
 
@@ -258,7 +328,7 @@ public class TicketResource extends BaseResource {
                 }
 
                 sendJsonResponse(exchange, 200, updatedTicket);
-                System.out.println("[STATUS] Statut du ticket #" + ticketId + " changé vers: " + request.getNewStatus());
+                System.out.println("[STATUS] Statut du ticket #" + ticketId + " changé vers: " + request.getNewStatus() + " par " + user.getName());
             } catch (IllegalStateException e) {
                 sendErrorResponse(exchange, 400, "INVALID_TRANSITION", e.getMessage());
             }
@@ -269,8 +339,19 @@ public class TicketResource extends BaseResource {
 
     /**
      * Assignation de ticket
+     * Admin/Dev seulement
      */
     private void handleAssignmentEndpoint(HttpExchange exchange, String method, String path) throws IOException {
+        User user = requireAuth(exchange);
+        if (user == null) return;
+
+        // Seuls Admin et Développeur peuvent assigner
+        if (!hasFullAccess(user)) {
+            sendErrorResponse(exchange, 403, "FORBIDDEN",
+                "Seuls les administrateurs et développeurs peuvent assigner des tickets");
+            return;
+        }
+
         if (!"PATCH".equals(method)) {
             sendErrorResponse(exchange, 405, "METHOD_NOT_ALLOWED", "Méthode non autorisée");
             return;
@@ -299,13 +380,17 @@ public class TicketResource extends BaseResource {
         }
 
         sendJsonResponse(exchange, 200, updatedTicket);
-        System.out.println("[ASSIGNMENT] Ticket #" + ticketId + " assigné à l'utilisateur #" + request.getUserID());
+        System.out.println("[ASSIGNMENT] Ticket #" + ticketId + " assigné à l'utilisateur #" + request.getUserID() + " par " + user.getName());
     }
 
     /**
      * Export PDF
+     * Authentification requise
      */
     private void handleExportPdfEndpoint(HttpExchange exchange, String method, String path) throws IOException {
+        User user = requireAuth(exchange);
+        if (user == null) return;
+
         if (!"GET".equals(method)) {
             sendErrorResponse(exchange, 405, "METHOD_NOT_ALLOWED", "Méthode non autorisée");
             return;
@@ -326,6 +411,6 @@ public class TicketResource extends BaseResource {
         }
 
         sendTextResponse(exchange, 200, pdfContent);
-        System.out.println("[EXPORT] Ticket #" + ticketId + " exporté en PDF");
+        System.out.println("[EXPORT] Ticket #" + ticketId + " exporté en PDF par " + user.getName());
     }
 }

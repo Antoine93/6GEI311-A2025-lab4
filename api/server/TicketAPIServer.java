@@ -42,6 +42,8 @@ public class TicketAPIServer {
             server.start();
 
             System.out.println("[OK] Serveur démarré avec succès!");
+            System.out.println("\n\u001B[1m\u001B[32m📚 Documentation interactive (Swagger UI):\u001B[0m");
+            System.out.println("  \u001B[36mhttp://localhost:" + PORT + "/docs\u001B[0m");
             System.out.println("\nEndpoints disponibles:");
             System.out.println("  GET    " + BASE_PATH);
             System.out.println("  POST   " + BASE_PATH + "/auth/login");
@@ -72,6 +74,10 @@ public class TicketAPIServer {
      * Enregistre tous les handlers (resources) du serveur
      */
     private static void registerHandlers(HttpServer server) {
+        // Documentation Swagger UI
+        server.createContext("/docs", new SwaggerUIResource());
+        server.createContext("/openapi.yaml", new OpenApiResource());
+
         // Page d'accueil de l'API
         server.createContext(BASE_PATH, new ApiHomeResource());
 
