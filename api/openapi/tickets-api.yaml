@@ -398,6 +398,21 @@ components:
           additionalProperties: true
 
   # --------------------------------------------------------------------------
+  # Schémas de sécurité
+  # --------------------------------------------------------------------------
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Token d'authentification obtenu via POST /auth/login.
+
+        Format: Authorization: Bearer <token>
+
+        Exemple: Authorization: Bearer session_abc123xyz
+
+  # --------------------------------------------------------------------------
   # Paramètres réutilisables
   # --------------------------------------------------------------------------
   parameters:
@@ -479,6 +494,10 @@ components:
 # ENDPOINTS API (Phases 1.3 à 1.7)
 # ============================================================================
 
+# Sécurité par défaut pour tous les endpoints (sauf /auth/login)
+security:
+  - BearerAuth: []
+
 paths:
   # ==========================================================================
   # AUTHENTIFICATION
@@ -492,6 +511,7 @@ paths:
         Authentifie un utilisateur et retourne un token de session.
         Pour ce lab, l'authentification est simplifiée (ID utilisateur uniquement).
       operationId: login
+      security: []  # Pas d'authentification requise pour se connecter
       requestBody:
         required: true
         content:

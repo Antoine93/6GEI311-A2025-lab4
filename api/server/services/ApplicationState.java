@@ -311,10 +311,10 @@ public class ApplicationState {
     // Opérations métier
     // ========================================================================
 
-    public TicketDTO createTicket(CreateTicketRequest request) {
-        // TODO: Récupérer l'utilisateur connecté depuis la session
-        // Pour l'instant, on utilise le premier utilisateur
-        User creator = allUsers.get(0);
+    public TicketDTO createTicket(CreateTicketRequest request, User creator) {
+        if (creator == null) {
+            throw new IllegalArgumentException("L'utilisateur créateur ne peut pas être null");
+        }
 
         Content content = convertDTOToContent(request.getDescriptionContent());
         Ticket ticket = creator.createTicket(request.getTitle(), content, request.getPriority());

@@ -22,6 +22,12 @@ public class AuthResource extends BaseResource {
         String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
 
+        // Support CORS preflight
+        if ("OPTIONS".equals(method)) {
+            handleOptionsRequest(exchange);
+            return;
+        }
+
         try {
             if (path.endsWith("/login") && "POST".equals(method)) {
                 handleLogin(exchange);
