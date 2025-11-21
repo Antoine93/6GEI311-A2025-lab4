@@ -7,7 +7,7 @@
 *.ear
 *.zip
 *.tar.gz
-*.rar
+#*.rar
 
 # Dossiers de compilation
 bin/
