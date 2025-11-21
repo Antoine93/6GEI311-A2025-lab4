@@ -2,12 +2,12 @@
 # Fichiers compilés Java
 # ============================================
 *.class
-*.jar
+#*.jar
 *.war
 *.ear
 *.zip
 *.tar.gz
-#*.rar
+*.rar
 
 # Dossiers de compilation
 bin/
