@@ -2,27 +2,33 @@ package gui.controllers;
 
 import java.util.*;
 
-import core.content.*;
-import core.entities.*;
-
 /**
- * ApplicationState - Singleton
- * Gere l'etat global de l'application (utilisateur connecte, liste des tickets)
- * REFACTORISE: Implémente le pattern Observer pour notifier les changements d'état
+ * ApplicationState - Singleton (DÉPRÉCIÉ en Lab 4)
+ *
+ * IMPORTANT: Ce fichier est conservé pour compatibilité, mais n'est PLUS utilisé
+ * dans l'architecture REST du Lab 4.
+ *
+ * Dans Lab 2-3, cette classe gérait l'état global de l'application (utilisateur connecté,
+ * liste des tickets) en mémoire côté client.
+ *
+ * Dans Lab 4, l'état est maintenant géré côté serveur (api.server.services.ApplicationState)
+ * et le client (GUI) communique via REST API (RestApiClient).
+ *
+ * Ce fichier est conservé uniquement pour :
+ * - Éviter les erreurs de compilation si du code legacy y fait référence
+ * - Documenter la transition architecturale
+ *
+ * NOUVEAU FLUX (Lab 4):
+ * GUI View → TicketController → RestApiClient → API Server → Server ApplicationState → Core Entities
+ *
+ * ANCIEN FLUX (Lab 2-3):
+ * GUI View → TicketController → Client ApplicationState (ce fichier) → Core Entities
  */
 public class ApplicationState {
     private static ApplicationState instance;
 
-    private User currentUser;
-    private List<Ticket> allTickets;
-    private List<User> allUsers;
-    private List<TicketStateListener> listeners;  // NOUVEAU: Support du pattern Observer
-
     private ApplicationState() {
-        allTickets = new ArrayList<>();
-        allUsers = new ArrayList<>();
-        listeners = new ArrayList<>();  // NOUVEAU
-        initTestData();
+        // Constructeur vide - cette classe n'est plus utilisée
     }
 
     public static ApplicationState getInstance() {
@@ -33,102 +39,67 @@ public class ApplicationState {
     }
 
     /**
-     * Enregistre un listener pour recevoir les notifications de changement d'état
+     * @deprecated Utiliser TicketController.login() à la place
      */
+    @Deprecated
     public void addListener(TicketStateListener listener) {
-        if (!listeners.contains(listener)) {
-            listeners.add(listener);
-        }
+        System.err.println("AVERTISSEMENT: ApplicationState.addListener() est déprécié. " +
+                         "L'état est maintenant géré côté serveur.");
     }
 
     /**
-     * Désenregistre un listener
+     * @deprecated Utiliser TicketController.logout() à la place
      */
+    @Deprecated
     public void removeListener(TicketStateListener listener) {
-        listeners.remove(listener);
+        System.err.println("AVERTISSEMENT: ApplicationState.removeListener() est déprécié.");
     }
 
     /**
-     * Notifie tous les listeners qu'un changement de tickets a eu lieu
+     * @deprecated Utiliser TicketController.getCurrentUser() à la place
      */
-    private void notifyTicketsChanged() {
-        for (TicketStateListener listener : listeners) {
-            listener.onTicketsChanged();
-        }
+    @Deprecated
+    public Object getCurrentUser() {
+        System.err.println("AVERTISSEMENT: ApplicationState.getCurrentUser() est déprécié. " +
+                         "Utiliser TicketController.getCurrentUser()");
+        return null;
     }
 
     /**
-     * Notifie tous les listeners qu'un changement d'utilisateur a eu lieu
+     * @deprecated Utiliser RestApiClient.getAllTickets() via TicketController à la place
      */
-    private void notifyCurrentUserChanged() {
-        for (TicketStateListener listener : listeners) {
-            listener.onCurrentUserChanged();
-        }
+    @Deprecated
+    public List<?> getAllTickets() {
+        System.err.println("AVERTISSEMENT: ApplicationState.getAllTickets() est déprécié. " +
+                         "Utiliser TicketController.getAllTickets()");
+        return new ArrayList<>();
     }
 
     /**
-     * Initialise les donnees de test
+     * @deprecated Utiliser RestApiClient.getAllUsers() via TicketController à la place
      */
-    private void initTestData() {
-        // Creer des utilisateurs de test
-        currentUser = new User(1, "Utilisateur1", "utilisateur1@uqac.ca", "Developpeur");
-        allUsers.add(currentUser);
-        allUsers.add(new User(2, "Utilisateur2", "utilisateur2@uqac.ca", "Testeur"));
-        allUsers.add(new Admin(100, "Utilisateur3", "utilisateur3@uqac.ca"));
-
-        // Creer quelques tickets de test
-        TextContent desc1 = new TextContent(
-            "L'application crash lorsqu'on clique sur le bouton de connexion apres 3 tentatives echouees."
-        );
-        Ticket ticket1 = currentUser.createTicket(
-            "Bug critique - Crash a la connexion",
-            desc1,
-            "Haute"
-        );
-        allTickets.add(ticket1);
-
-        TextContent desc2 = new TextContent(
-            "L'interface utilisateur n'est pas responsive sur mobile. Les boutons sont trop petits."
-        );
-        Ticket ticket2 = currentUser.createTicket(
-            "Amelioration UI - Responsive design",
-            desc2,
-            "Moyenne"
-        );
-        allTickets.add(ticket2);
-
-        TextContent desc3 = new TextContent(
-            "Le systeme 2FA ne valide pas correctement les codes apres plusieurs tentatives."
-        );
-        Ticket ticket3 = currentUser.createTicket(
-            "Bug 2FA - Validation incorrecte",
-            desc3,
-            "Critique"
-        );
-        allTickets.add(ticket3);
+    @Deprecated
+    public List<?> getAllUsers() {
+        System.err.println("AVERTISSEMENT: ApplicationState.getAllUsers() est déprécié. " +
+                         "Utiliser TicketController.getAllUsers()");
+        return new ArrayList<>();
     }
 
-    // Getters
-    public User getCurrentUser() {
-        return currentUser;
+    /**
+     * @deprecated Utiliser RestApiClient.createTicket() via TicketController à la place
+     */
+    @Deprecated
+    public void addTicket(Object ticket) {
+        System.err.println("AVERTISSEMENT: ApplicationState.addTicket() est déprécié. " +
+                         "Utiliser TicketController.createTicketWithContentItems()");
     }
 
-    public List<Ticket> getAllTickets() {
-        return new ArrayList<>(allTickets);
-    }
-
-    public List<User> getAllUsers() {
-        return new ArrayList<>(allUsers);
-    }
-
-    // Methodes de manipulation
-    public void addTicket(Ticket ticket) {
-        allTickets.add(ticket);
-        notifyTicketsChanged();  // NOUVEAU: Notifier les observers
-    }
-
-    public void setCurrentUser(User user) {
-        this.currentUser = user;
-        notifyCurrentUserChanged();  // NOUVEAU: Notifier les observers
+    /**
+     * @deprecated Utiliser TicketController.login() à la place
+     */
+    @Deprecated
+    public void setCurrentUser(Object user) {
+        System.err.println("AVERTISSEMENT: ApplicationState.setCurrentUser() est déprécié. " +
+                         "Utiliser TicketController.login()");
     }
 }

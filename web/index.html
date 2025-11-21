@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système de Gestion de Tickets - Interface Web</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Page de login -->
+    <div id="login-page" class="page">
+        <div class="login-container">
+            <h1>🎫 Système de Gestion de Tickets</h1>
+            <h2>Connexion</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="user-id">ID Utilisateur:</label>
+                    <input type="number" id="user-id" value="1" required>
+                    <small>IDs disponibles: 1 (Développeur), 2 (Testeur), 100 (Admin)</small>
+                </div>
+                <button type="submit" class="btn btn-primary">Se connecter</button>
+            </form>
+            <div id="login-error" class="error-message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Page principale -->
+    <div id="main-page" class="page" style="display: none;">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>🎫 Gestion de Tickets</h1>
+            <div class="user-info">
+                <span id="current-user-name"></span>
+                <button id="logout-btn" class="btn btn-secondary">Déconnexion</button>
+            </div>
+        </header>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <button id="new-ticket-btn" class="btn btn-primary">➕ Nouveau Ticket</button>
+            <button id="refresh-btn" class="btn btn-secondary">🔄 Rafraîchir</button>
+            <div class="filter-group">
+                <label for="status-filter">Filtrer par statut:</label>
+                <select id="status-filter">
+                    <option value="">Tous</option>
+                    <option value="Ouvert">Ouvert</option>
+                    <option value="Assigne">Assigné</option>
+                    <option value="En validation">En validation</option>
+                    <option value="Termine">Terminé</option>
+                    <option value="Ferme">Fermé</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Liste des tickets -->
+        <div class="content-area">
+            <div class="tickets-section">
+                <h2>Liste des tickets</h2>
+                <div id="tickets-list" class="tickets-list">
+                    <!-- Les tickets seront ajoutés ici dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Détails du ticket -->
+            <div class="ticket-details-section" id="ticket-details-section" style="display: none;">
+                <h2>Détails du ticket</h2>
+                <div id="ticket-details">
+                    <!-- Les détails seront affichés ici -->
+                </div>
+                <div class="ticket-actions">
+                    <button id="add-comment-btn" class="btn btn-primary">💬 Ajouter un commentaire</button>
+                    <button id="change-status-btn" class="btn btn-primary">🔄 Changer le statut</button>
+                    <button id="assign-ticket-btn" class="btn btn-primary">👤 Assigner</button>
+                    <button id="export-pdf-btn" class="btn btn-secondary">📄 Export PDF</button>
+                    <button id="delete-ticket-btn" class="btn btn-danger" style="display: none;">🗑️ Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Nouveau ticket -->
+    <div id="new-ticket-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Créer un nouveau ticket</h2>
+            <form id="new-ticket-form">
+                <div class="form-group">
+                    <label for="ticket-title">Titre:</label>
+                    <input type="text" id="ticket-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="ticket-priority">Priorité:</label>
+                    <select id="ticket-priority" required>
+                        <option value="Critique">Critique</option>
+                        <option value="Haute">Haute</option>
+                        <option value="Moyenne" selected>Moyenne</option>
+                        <option value="Basse">Basse</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ticket-description">Description:</label>
+                    <textarea id="ticket-description" rows="5" required></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Créer</button>
+                    <button type="button" class="btn btn-secondary close-modal">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Ajouter commentaire -->
+    <div id="comment-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Ajouter un commentaire</h2>
+            <form id="comment-form">
+                <div class="form-group">
+                    <label for="comment-text">Commentaire:</label>
+                    <textarea id="comment-text" rows="4" required></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                    <button type="button" class="btn btn-secondary close-modal">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Changer statut -->
+    <div id="status-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Changer le statut</h2>
+            <form id="status-form">
+                <div class="form-group">
+                    <label for="new-status">Nouveau statut:</label>
+                    <select id="new-status" required>
+                        <!-- Options remplies dynamiquement -->
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Changer</button>
+                    <button type="button" class="btn btn-secondary close-modal">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Assigner ticket -->
+    <div id="assign-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Assigner le ticket</h2>
+            <form id="assign-form">
+                <div class="form-group">
+                    <label for="assign-user">Utilisateur:</label>
+                    <select id="assign-user" required>
+                        <!-- Options remplies dynamiquement -->
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Assigner</button>
+                    <button type="button" class="btn btn-secondary close-modal">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
