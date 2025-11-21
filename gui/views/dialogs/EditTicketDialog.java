@@ -8,6 +8,7 @@ import javax.swing.*;
 import core.content.Content;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -182,11 +183,11 @@ public class EditTicketDialog extends JDialog {
 
         // Appeler le controller pour sauvegarder les modifications
         try {
-            if (newContentItems != null && !newContentItems.isEmpty()) {
-                ticketController.updateTicketWithContentItems(ticketID, title, priority, newContentItems);
-            } else {
-                ticketController.updateTicket(ticketID, title, priority, null);
+            // Utiliser updateTicket dans tous les cas (avec liste vide si pas de contenu)
+            if (newContentItems == null || newContentItems.isEmpty()) {
+                newContentItems = new ArrayList<>();
             }
+            ticketController.updateTicket(ticketID, title, priority, newContentItems);
 
             JOptionPane.showMessageDialog(this,
                 "Ticket modifie avec succes!",

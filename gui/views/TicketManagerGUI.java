@@ -39,8 +39,8 @@ public class TicketManagerGUI extends JFrame implements TicketStateListener {
     public TicketManagerGUI() {
         ticketController = new TicketController();
 
-        // S'enregistrer comme listener pour les changements d'état
-        ApplicationState.getInstance().addListener(this);
+        // Note: ApplicationState n'est plus utilisé en Lab 4 (architecture REST)
+        // Les changements d'état sont maintenant gérés via le serveur REST
 
         // Afficher le dialogue de login au démarrage
         showLoginDialog();

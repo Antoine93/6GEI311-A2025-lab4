@@ -8,12 +8,12 @@ import java.util.List;
 
 /**
  * LoginDialog
- * Dialogue de connexion permettant de choisir l'utilisateur actif
- * Supporte User et Admin
- * REFACTORISE: Constructeur avec injection de dépendances du controller
+ * Dialogue de connexion permettant de saisir l'ID utilisateur
+ * IDs disponibles: 1 (Developpeur), 2 (Testeur), 100 (Admin)
+ * REFACTORISE (Lab 4): Saisie manuelle de l'ID pour éviter l'appel API avant authentification
  */
 public class LoginDialog extends JDialog {
-    private JComboBox<String> userCombo;
+    private JTextField userIDField;
     private JButton loginButton;
     private JButton cancelButton;
     private TicketController ticketController;
@@ -55,34 +55,29 @@ public class LoginDialog extends JDialog {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
-        JLabel titleLabel = new JLabel("Sélectionnez votre profil utilisateur:");
+        JLabel titleLabel = new JLabel("Entrez votre ID utilisateur:");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
         panel.add(titleLabel, gbc);
 
-        // Label "Utilisateur"
+        // Label "ID Utilisateur"
         gbc.gridy = 1;
         gbc.gridwidth = 1;
         gbc.weightx = 0;
-        panel.add(new JLabel("Utilisateur:"), gbc);
+        panel.add(new JLabel("ID Utilisateur:"), gbc);
 
-        // ComboBox avec la liste des utilisateurs
+        // Champ de texte pour l'ID utilisateur
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-
-        List<UserDTO> users = ticketController.getAllUsers();
-        String[] userNames = users.stream()
-            .map(u -> u.getName() + " (" + u.getRole() + ")")
-            .toArray(String[]::new);
-
-        userCombo = new JComboBox<>(userNames);
-        panel.add(userCombo, gbc);
+        userIDField = new JTextField(10);
+        userIDField.setText("1"); // Valeur par défaut
+        panel.add(userIDField, gbc);
 
         // Note explicative
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.gridwidth = 2;
         JLabel noteLabel = new JLabel(
-            "<html><i>Note: Les Admins ont accès à toutes les fonctionnalités</i></html>");
+            "<html><i>IDs disponibles: 1 (Developpeur), 2 (Testeur), 100 (Admin)</i></html>");
         noteLabel.setForeground(Color.GRAY);
         panel.add(noteLabel, gbc);
 
@@ -108,12 +103,25 @@ public class LoginDialog extends JDialog {
     }
 
     private void onLogin() {
-        int selectedIndex = userCombo.getSelectedIndex();
-        if (selectedIndex != -1) {
-            List<UserDTO> users = ticketController.getAllUsers();
-            selectedUserID = users.get(selectedIndex).getUserID();
+        String userIDText = userIDField.getText().trim();
+
+        if (userIDText.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Veuillez entrer un ID utilisateur.",
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            selectedUserID = Integer.parseInt(userIDText);
             loginSuccessful = true;
             dispose();
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this,
+                "L'ID utilisateur doit être un nombre entier.",
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
         }
     }
 

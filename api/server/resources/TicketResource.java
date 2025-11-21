@@ -303,7 +303,7 @@ public class TicketResource extends BaseResource {
             }
 
             sendJsonResponse(exchange, 200, transitions);
-        } else if ("PATCH".equals(method)) {
+        } else if ("POST".equals(method)) {
             // Seuls Admin et Développeur peuvent changer les statuts
             if (!hasFullAccess(user)) {
                 sendErrorResponse(exchange, 403, "FORBIDDEN",
@@ -352,7 +352,7 @@ public class TicketResource extends BaseResource {
             return;
         }
 
-        if (!"PATCH".equals(method)) {
+        if (!"POST".equals(method)) {
             sendErrorResponse(exchange, 405, "METHOD_NOT_ALLOWED", "Méthode non autorisée");
             return;
         }

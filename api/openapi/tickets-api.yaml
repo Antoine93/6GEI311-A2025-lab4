@@ -847,7 +847,7 @@ paths:
   # GESTION DES STATUTS
   # ==========================================================================
   /tickets/{id}/status:
-    patch:
+    post:
       tags:
         - status
       summary: Changer le statut d'un ticket
@@ -926,7 +926,7 @@ paths:
   # ASSIGNATION
   # ==========================================================================
   /tickets/{id}/assignment:
-    patch:
+    post:
       tags:
         - tickets
       summary: Assigner un ticket à un utilisateur
