@@ -6,6 +6,13 @@
 
 ---
 
+## Table des matières
+
+[Instructions d'exécution](#instructions-dexécution)
+1. [Section I - Modifications apportées](#section-i---modifications-apportées)
+2. [Section II - Leçons apprises](#section-ii---leçons-apprises)
+
+---
 # Instructions d'exécution
 
 ## Prérequis
@@ -60,14 +67,6 @@ Ouvrir `web/index.html` dans un navigateur (serveur doit être démarré).
 
 - Swagger UI: http://localhost:8080/docs
 - OpenAPI YAML: http://localhost:8080/openapi.yaml
-
----
-
-## Table des matières
-
-[Instructions d'exécution](#instructions-dexécution)
-1. [Section I - Modifications apportées](#section-i---modifications-apportées)
-2. [Section II - Leçons apprises](#section-ii---leçons-apprises)
 
 ---
 
