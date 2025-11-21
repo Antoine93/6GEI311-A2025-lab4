@@ -10,8 +10,8 @@ Transformation de l'application standalone (Lab 2-3) en architecture distribuée
 ┌─────────────────────────────────────────────┐
 │               Client (GUI)                  │
 │                                             │
-│  ┌──────────────┐    ┌──────────────────┐  │
-│  │TicketManager │───→│TicketController  │  │
+│  ┌──────────────┐    ┌──────────────────┐   │
+│  │TicketManager │───→│TicketController  │   │
 │  │    GUI       │    └────────┬─────────┘  │
 │  └──────────────┘             │            │
 │                               ↓            │

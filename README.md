@@ -57,11 +57,10 @@ java -cp "lib/gson-2.10.1.jar;classes" api.server.TicketAPIServer
 
 # Terminal 2: Démarrer le client GUI
 java -cp "lib/gson-2.10.1.jar;classes" MainGUI
+
+# Navigateur web: Démarrer le client web
+web/index.html # ouvrir le fichier dans un navigateur
 ```
-
-## Interface web (bonus)
-
-Ouvrir `web/index.html` dans un navigateur (serveur doit être démarré).
 
 ## Documentation API
 
@@ -71,6 +70,18 @@ Ouvrir `web/index.html` dans un navigateur (serveur doit être démarré).
 ---
 
 # Section I - Modifications apportées
+
+## Travail effectué
+
+**Lab 2 - Logique métier (core/):** Conception d'un système de gestion de tickets avec trois patrons de conception. Le **pattern Composite** permet des descriptions riches (texte, image, vidéo ou combinaison). Le **pattern Strategy** avec l'interface `Exporter` permet l'export PDF extensible. Le **pattern Visitor** via `accept(Exporter)` assure un export type-safe sans `instanceof`. L'énumération `TicketStatus` implémente une machine à états validant les transitions (OUVERT → ASSIGNÉ → VALIDATION → TERMINÉ). La classe `Admin` hérite de `User` (principe de substitution de Liskov).
+
+**Lab 3 - Interface graphique (gui/):** Architecture MVC avec Swing. Les **DTOs** (`TicketDTO`, `UserDTO`, `ContentItemDTO`) découplent la vue du domaine. Le **pattern Observer** via `TicketStateListener` permet le rafraîchissement automatique de l'interface. `ApplicationState` (Singleton) gérait l'état global côté client. Services stateless (`PermissionService`, `TicketValidator`) centralisent validation et permissions. L'interface permet création/modification de tickets, gestion des statuts, assignation et commentaires selon les rôles utilisateur.
+
+**Lab 4 - Architecture REST (api/):** Transformation en architecture distribuée client-serveur. Le **serveur HTTP** (`TicketAPIServer`) expose 14 endpoints REST sur le port 8080. L'état migre du client vers le serveur (`api.server.services.ApplicationState`) avec gestion des sessions via token Bearer. Les **Resources** (AuthResource, TicketResource, UserResource) implémentent les handlers HTTP. Côté client, `RestApiClient` (Singleton) encapsule les appels HTTP avec Gson pour la sérialisation JSON. Le `TicketController` est modifié pour utiliser `RestApiClient` au lieu de l'accès direct aux entités. Documentation complète via **OpenAPI/Swagger** (`tickets-api.yaml`).
+
+**Interface web bonus (web/):** Client web SPA démontrant la réutilisabilité de l'API. `api.js` implémente un client REST JavaScript identique à `RestApiClient.java`. L'interface HTML/CSS permet login, CRUD tickets, commentaires, changement de statut et export PDF. Preuve que l'architecture REST permet plusieurs clients (Swing + Web) partageant la même API.
+
+---
 
 ## 1. Vue d'ensemble architecturale
 
@@ -355,7 +366,7 @@ headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
 ```
 
 ### Gestion des erreurs réseau
-**Défi:** Le client doit gérer gracieusement les erreurs (serveur non démarré, timeout, etc.).
+**Défi:** Le client doit bien gérer les erreurs (serveur non démarré, timeout, etc.).
 
 **Solution:** Encapsulation des appels dans try/catch avec messages utilisateur appropriés.
 
